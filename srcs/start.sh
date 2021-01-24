@@ -10,7 +10,8 @@ echo "*** Starting mysql"
 
 service mysql start
 
-
+envsubst < ft_server > /etc/nginx/sites-available/ft_server
+rm ft_server
 
 # Start nginx
 echo "*** Starting nginx"
