@@ -1,36 +1,30 @@
-FROM debian:buster
+FROM	debian:buster
 
 RUN 	apt update && \
 	apt install -y \
-	nginx \
-	php-fpm \
-	php-mysql \
 	mariadb-server \
-	gettext-base 
+	gettext-base \
+	php-mysql \
+	php-fpm \
+	nginx
 
-ADD srcs/phpmyadmin.tar.gz /var/www/html/
-ADD srcs/wordpress.tar.gz /var/www/html/
+ENV 	AUTO_IDX on
 
-RUN unlink /etc/nginx/sites-enabled/default
+ADD	srcs/phpmyadmin.tar.gz /var/www/html/
+ADD	srcs/wordpress.tar.gz /var/www/html/
 
-COPY srcs/ft_server .
-COPY srcs/nginx-selfsigned.key /etc/ssl/private/nginx-selfsigned.key
-COPY srcs/nginx-selfsigned.crt /etc/ssl/certs/nginx-selfsigned.crt
+COPY	srcs/nginx-selfsigned.key /etc/ssl/private/nginx-selfsigned.key
+COPY	srcs/nginx-selfsigned.crt /etc/ssl/certs/nginx-selfsigned.crt
+COPY	srcs/wp-config.php /var/www/html/wordpress/
+COPY	srcs/wordpress.sql .
+COPY	srcs/ft_server .
+COPY	srcs/mysql.sh .
+COPY	srcs/start.sh .
 
-RUN ln -s /etc/nginx/sites-available/ft_server  /etc/nginx/sites-enabled/
-
-COPY srcs/test.php /var/www/html/
-COPY srcs/start.sh .
-
-COPY srcs/mysql.sh .
-COPY srcs/wp-config.php /var/www/html/wordpress/
-COPY srcs/wordpress.sql .
-
-RUN chmod +x start.sh mysql.sh
-
-RUN ./mysql.sh
-
-ENV AUTO_IDX on
+RUN	ln -s /etc/nginx/sites-available/ft_server /etc/nginx/sites-enabled/ && \
+	unlink /etc/nginx/sites-enabled/default && \
+	chmod +x mysql.sh start.sh && \
+	./mysql.sh
 
 ENTRYPOINT ["./start.sh"]
 
